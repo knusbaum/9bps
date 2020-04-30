@@ -1,0 +1,8 @@
+fn build {
+	mk
+}
+
+fn install {
+	mk install
+}
+

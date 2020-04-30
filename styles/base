@@ -1,0 +1,113 @@
+fn pre_fetch {}
+fn post_fetch {}
+fn pre_extract {}
+fn post_extract {}
+fn pre_build {}
+fn post_build {}
+fn pre_install {}
+fn post_install {}
+fn pre_package {}
+fn post_package {}
+
+fn sha1 {
+	sha1sum $* | awk '{print $1}'
+}
+
+fn extractfile {
+	file=$1
+	ret=''
+	if(~ $file (*.tar.gz *.tgz)) {
+		echo $file is a gzipped tarball.
+		tar -xzf $file
+		ret=$status
+	}
+	if(~ $file *.tar) {
+		echo $file is a tarball.
+		tar -xf $file
+		ret=$status
+	}
+	status=$ret
+}
+
+fn fetch {
+	for(n in `{seq 1 $#files}) {
+		s=$sums($n)
+		f=$files($n)
+		basef=`{basename $f}
+
+		if(test -f $fcache/$basef) {
+			echo Found $basef in cache
+			status=''
+		}
+		if not {
+			echo FETCHING $basef
+			if(! hget $f > $fcache/$basef) {
+				echo Failed to fetch $f
+				exit 'bad_fetch'
+			}
+			if not {
+				echo Fetched $f to $fcache/$basef
+			}
+		}
+		sha=`{sha1 $fcache/$basef}
+		if(! ~ $sha $s) {
+			echo Expected sha1sum $s but $f has sum $sha
+			exit 'bad_sha1sum'
+		}
+		if not {
+			echo Sums match '(' $s ')'
+		}
+	}
+	status=''
+}
+
+fn extract {
+	cd $builddir
+	if(! ~ $#files 1) {
+		mkdir $builddir/$wrksrc
+		cd $builddir/$wrksrc
+	}
+
+	for(n in `{seq 1 $#files}) {
+		f=$files($n)
+		basef=`{basename $f}
+		echo Extracting $fcache/$basef to `{pwd}
+		if(! extractfile $fcache/$basef) {
+			echo 'STATUS: ['$status']'
+			echo Failed to extract $fcache/$basef
+			exit 'failed_extract'
+		}
+		echo DONE EXTRACTING $fcache/$basef
+	}
+}
+
+fn package {
+	cd $installdir
+	tar -cf $tardir/root.tar *
+	walk -f >$tardir/manifest
+	cd $tardir
+	echo 'pkg='$pkg >meta
+	echo 'version='$version^_$rev >>meta
+	echo 'arch='$objtype >>meta
+	echo 'maintainer='$maintainer >>meta
+	#tar -tvf root.tar >manifest
+	tar -cvzf $packagedir/$pkg.$version^_$rev.tgz *
+}
+
+fn try {
+	status=''
+	$1
+	r=$status
+	if(! ~ $r '') {
+		echo FAILED $1 '(' $r ')'
+		exit failed_$1
+	}
+}
+
+fn trystage {
+	echo STAGE: $1
+	try pre_$1
+	try $1
+	try post_$1
+	status=''
+}
