@@ -6,6 +6,8 @@ fn pre_build {}
 fn post_build {}
 fn pre_install {}
 fn post_install {}
+fn pre_normalize {}
+fn post_normalize {}
 fn pre_package {}
 fn post_package {}
 
@@ -87,17 +89,28 @@ fn extract {
 	status=''
 }
 
+fn normalize {
+	cd $installdir
+	## TODO
+	## There are issues here with normalizing the package.
+	## e.g. if we normalize all bin paths (/$arch/bin -> /bin, /rc/bin -> /bin)
+	## then if we want to install on a host, we can't easily reverse that process.
+	## It may be possible to determine the file type and move stuff from there,
+	## but the easier solution may be to package without normalizing, and normalize
+	## during the binding process.
+}
+
 fn package {
 	cd $installdir
 	tar -cf $tardir/root.tar *
-	walk -f >$tardir/manifest
+	walk -f | sed 's|^|/|g' >$tardir/manifest
 	cd $tardir
 	echo 'pkg='$pkg >meta
 	echo 'version='$version^_$rev >>meta
-	echo 'arch='$objtype >>meta
-	echo 'maintainer='$maintainer >>meta
-	#tar -tvf root.tar >manifest
-	tar -cvzf $packagedir/$pkg.$version^_$rev.tgz *
+	echo 'arch='$targetarch >>meta
+	echo 'maintainer='''$maintainer'''' >>meta
+	echo 'description='''$description'''' >>meta
+	tar -cvzf $packagedir/$pkg-$version^_$rev.pkg *
 }
 
 fn try {

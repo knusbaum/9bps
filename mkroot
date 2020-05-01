@@ -33,7 +33,7 @@ echo 'bind -a /oldroot/$objtype/bin /bin' >>/tmp/bpsrootnamespace
 rootspec=other rootdir=/root/usr/$user/bpsroot auth/newns -n /tmp/bpsrootnamespace /sys/lib/newuser
 rootspec=other rootdir=/root/usr/$user/bpsroot auth/newns -n /tmp/bpsrootnamespace rc -e -c '
 cd /sys/src
-for(arch in ('$cputype' arm arm64 386 amd64)) {
+for(arch in ('$cputype' arm arm64 386 amd64 mips)) {
 	#mkdir -p /$arch/bin
 	#mkdir -p /$arch/lib/ape
 	#mkdir -p /$arch/bin/ape

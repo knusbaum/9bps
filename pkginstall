@@ -1,0 +1,68 @@
+#!/bin/rc -e
+
+pkgname=$1
+
+if(~ $pkgname '') {
+	echo Usage: pkginstall [pkgname]
+	exit no_pkgname
+}
+
+tmpcache=/tmp/pkg/
+pkgcache=/sys/lib/pkg
+
+pkgfile=`{pkgfind $pkgname}
+if(~ $pkgfile '') {
+	exit no_package
+}
+pwd=`{pwd}
+pkgfile=$pwd/$pkgfile
+
+echo Found $pkgfile
+
+mkdir -p $tmpcache/$pkgname
+@{ cd $tmpcache/$pkgname && tar -xvzf $pkgfile }
+
+fn atexit {
+	rm -r $tmpcache/$pkgname
+}
+
+## Validate package with metadata.
+echo Validating $pkgname
+. $tmpcache/$pkgname/meta
+
+if(! ~ $pkg $pkgname) {
+	echo $pkgfile contains package $pkg, not $pkgname.
+	exit wrong_package
+}
+
+if(! ~ $arch $objtype) {
+	if(! ~ $arch noarch) {
+		echo $pkgfile contains a package for $arch, not $objtype
+		exit wrong_arch
+	}
+}
+
+## Check if we have already installed a package with this name.
+if(test -d $pkgcache/$pkgname) {
+	res=@{
+		rfork e
+		newversion=$version
+		## TODO: Implement semver checking
+		. $pkgcache/$pkgname/meta
+		if(~ $newversion $version) {
+			echo $pkg-$version already installed.
+			exit already_installed
+		}
+	}
+	if(! ~ $res '') {
+		exit $res
+	}	
+}
+
+# After we validate the package, install it into the cache.
+mkdir -p $pkgcache/$pkgname
+dircp $tmpcache/$pkgname $pkgcache/$pkgname
+
+echo Unpacking $pkg-$version into /
+cd /
+tar -xvf $pkgcache/$pkgname/root.tar

@@ -4,6 +4,7 @@ rev=1
 style=mk
 wrksrc='unionfs-228091978e928c07612ede5efd6edcca1ccece38'
 maintainer='Kyle Nusbaum <knusbaum@sdf.org>'
+description='deep union file server for Plan 9'
 
 files='http://code.a-b.xyz/unionfs/snapshot/unionfs-228091978e928c07612ede5efd6edcca1ccece38.tar.gz'
 sums='9b82055fe1eefd5e0ec94b88ad18b892e7c2cfa2'

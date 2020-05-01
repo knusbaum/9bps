@@ -1,0 +1,24 @@
+#!/bin/rc
+
+pkgname=$1
+
+if(~ $pkgname '') {
+	echo Usage: pkgfind [pkgname]  >[1=2]
+	exit no_pkgname
+}
+
+fn pkgsplit {
+	sed 's|.*/(.+)-([a-zA-Z0-9]+_[0-9]+).pkg|\1	\2|g'
+}
+
+pkg=`{ls pkg/$objtype | grep $pkgname'-([a-zA-Z0-9]+)_([0-9]+).pkg'}
+
+if(~ $pkg '') {
+	pkg=`{ls pkg/noarch | grep $pkgname'-([a-zA-Z0-9]+)_([0-9]+).pkg'}
+	if(~ $pkg '') {
+		echo Could not find $pkgname >[1=2]
+		exit no_pkg
+	}
+}
+
+echo $pkg

@@ -1,0 +1,26 @@
+#!/bin/rc
+
+pkgname=$1
+
+if(~ $pkgname '') {
+	echo Usage: pkgremove [pkgname]
+	exit no_pkgname
+}
+
+pkgcache=/sys/lib/pkg
+
+if(! test -d $pkgcache/$pkgname) {
+	echo No such package $pkgname
+	exit no_package
+}
+
+. $pkgcache/$pkgname/meta
+
+echo Removing $pkg-$version
+nl='
+'
+for(f in `$nl{cat $pkgcache/$pkgname/manifest}) {
+	rm $f
+}
+
+rm -r $pkgcache/$pkgname

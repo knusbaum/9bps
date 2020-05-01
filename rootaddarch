@@ -1,0 +1,43 @@
+#!/bin/rc -x
+
+newarchs=$*
+
+for(newarch in $newarchs) {
+	if(~ $newarch '') {
+		echo Please specify an arch.
+		echo Usage: 'rootaddarch [arch]'
+		exit no_arch
+	}
+	# This is a poor test for whether $newarch is a valid arch
+	# but it's easy and somewhat effective.
+	if(! ~ /$newarch `{ls /}) {
+		echo $newarch is not a valid value for '$objtype'
+		exit bad_arch
+	}
+}
+
+bpsroot=/n/other/usr/$user/bpsroot
+
+if(! test -d $bpsroot) {
+	echo bpsroot does not exist.
+	exit no_bpsroot
+}
+
+## unlock
+walk $bpsroot | sed 's|^(.*)$|''\1''|g' | pfx chmod ug+w | rc
+
+cat /lib/namespace >/tmp/bpsrootnamespace
+echo 'mount -aC #s/boot /oldroot' >>/tmp/bpsrootnamespace
+echo 'bind -a /oldroot/$objtype/bin /bin' >>/tmp/bpsrootnamespace
+
+for(newarch in $newarchs) {
+	rootspec=other rootdir=/root/usr/$user/bpsroot auth/newns -n /tmp/bpsrootnamespace rc -e -c '
+	cd /sys/src
+	NPROC=10 nproc=10 objtype='$newarch' mk install
+
+	'
+}
+
+rm /tmp/bpsrootnamespace
+## lock
+walk $bpsroot | sed 's|^(.*)$|''\1''|g' | pfx chmod ugo-w | rc

@@ -1,4 +1,4 @@
-#!/bin/rc -x
+#!/bin/rc 
 
 pname=$1
 if(~ $1 '') {
@@ -7,7 +7,7 @@ if(~ $1 '') {
 }
 
 ## THESE SHOULD GO AWAY
-stylesdir=/9bps/styles ## SHOULD BECOME /sys/lib/9bps/styles
+stylesdir=/9bps/styles ## SHOULD BECOME /sys/lib/9bps/styles ?
 templatedir=/9bps/templates
 
 template=$templatedir/$pname^.tpl
@@ -17,10 +17,6 @@ sums=()
 style=mk
 
 . $stylesdir/base
-#if(! . $template) {
-#	echo Failed to load $template
-#	exit failed_template
-#}
 try . $template
 . $stylesdir/$style
 
@@ -28,12 +24,17 @@ if(~ $wrksrc '') {
 	wrksrc=$pkg-$version
 }
 
+targetarch=$objtype
+if(! ~ $noarch '') {
+	targetarch=noarch
+}
+
 fcache=/9bps/pkgcache
 pkgbuild=/9bps/buildroot/$pkg-$version^_$rev
 builddir=$pkgbuild/build
 installdir=$pkgbuild/artifacts/install
 tardir=$pkgbuild/artifacts/tar
-packagedir=/9bps/pkg/$objtype
+packagedir=/9bps/pkg/$targetarch
 rm -rf $pkgbuild
 mkdir -p $pkgbuild
 mkdir -p $fcache
@@ -43,33 +44,36 @@ mkdir -p $tardir
 mkdir -p $packagedir
 cd $builddir
 
+if(test -f $packagedir/$pkg-$version^_$rev.pkg) {
+	echo $pkg-$version $targetarch already built.
+	exit already_built
+}
+
+
 echo BUILDING $pkg-$version^_$rev for $objtype
 
 trystage fetch
 trystage extract
-
-if(! cd $builddir/$wrksrc) {
-	echo Couldn''t find wrksrc $builddir/$wrksrc
-	echo 'wrksrc1 should probably be one of'
-	ls $builddir
-	exit no_wrksrc
-}
-
 trystage build
 
 @{
-	rfork ns
+	rfork nse
 	#ls -l /9bps/unionfs
 	if(! /9bps/unionfs -b -m / -c $installdir /) {
 		echo UNIONFS FAILED
 		exit failed_unionfs
 	}
-	bind -b -c '#e' /env
+	bind -c '#e' /env
+	bind '#d' /fd
 
-	cd $builddir/$wrksrc
+	if(test -d $builddir/$wrksrc) {
+		cd $builddir/$wrksrc
+	}
 
 	trystage install
 }
+
+trystage normalize
 
 trystage package
 

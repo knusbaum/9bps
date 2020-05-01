@@ -1,4 +1,10 @@
 fn build {
+	if(! cd $builddir/$wrksrc) {
+		echo Couldn''t find wrksrc $builddir/$wrksrc
+		echo 'wrksrc1 should probably be one of'
+		ls $builddir
+		exit no_wrksrc
+	}
 	mk
 }
 

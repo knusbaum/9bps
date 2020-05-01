@@ -1,0 +1,8 @@
+#!/bin/rc
+
+for(f in `{ls templates}){
+	t=`{basename $f .tpl}
+	for(arch in (arm arm64 386 amd64 mips)) {
+		objtype=$arch pkgbuild $t
+	}
+}
