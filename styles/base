@@ -15,7 +15,7 @@ fn sha1 {
 
 fn extractfile {
 	file=$1
-	ret=''
+	ret='notfound'
 	if(~ $file (*.tar.gz *.tgz)) {
 		echo $file is a gzipped tarball.
 		tar -xzf $file
@@ -24,6 +24,11 @@ fn extractfile {
 	if(~ $file *.tar) {
 		echo $file is a tarball.
 		tar -xf $file
+		ret=$status
+	}
+	if(~ $file *.zip) {
+		echo $file is a zip.
+		unzip -f $file
 		ret=$status
 	}
 	status=$ret
@@ -71,14 +76,15 @@ fn extract {
 	for(n in `{seq 1 $#files}) {
 		f=$files($n)
 		basef=`{basename $f}
-		echo Extracting $fcache/$basef to `{pwd}
+		#echo Extracting $fcache/$basef to `{pwd}
 		if(! extractfile $fcache/$basef) {
 			echo 'STATUS: ['$status']'
 			echo Failed to extract $fcache/$basef
 			exit 'failed_extract'
 		}
-		echo DONE EXTRACTING $fcache/$basef
+		#echo DONE EXTRACTING $fcache/$basef
 	}
+	status=''
 }
 
 fn package {
@@ -96,7 +102,8 @@ fn package {
 
 fn try {
 	status=''
-	$1
+	#echo TRY $*
+	$*
 	r=$status
 	if(! ~ $r '') {
 		echo FAILED $1 '(' $r ')'

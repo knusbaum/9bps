@@ -1,0 +1,76 @@
+#!/bin/rc -x
+
+pname=$1
+if(~ $1 '') {
+	echo 'Usage: pkgbuild [package name]'
+	exit bad_args
+}
+
+## THESE SHOULD GO AWAY
+stylesdir=/9bps/styles ## SHOULD BECOME /sys/lib/9bps/styles
+templatedir=/9bps/templates
+
+template=$templatedir/$pname^.tpl
+
+files=()
+sums=()
+style=mk
+
+. $stylesdir/base
+#if(! . $template) {
+#	echo Failed to load $template
+#	exit failed_template
+#}
+try . $template
+. $stylesdir/$style
+
+if(~ $wrksrc '') {
+	wrksrc=$pkg-$version
+}
+
+fcache=/9bps/pkgcache
+pkgbuild=/9bps/buildroot/$pkg-$version^_$rev
+builddir=$pkgbuild/build
+installdir=$pkgbuild/artifacts/install
+tardir=$pkgbuild/artifacts/tar
+packagedir=/9bps/pkg/$objtype
+rm -rf $pkgbuild
+mkdir -p $pkgbuild
+mkdir -p $fcache
+mkdir -p $builddir
+mkdir -p $installdir
+mkdir -p $tardir
+mkdir -p $packagedir
+cd $builddir
+
+echo BUILDING $pkg-$version^_$rev for $objtype
+
+trystage fetch
+trystage extract
+
+if(! cd $builddir/$wrksrc) {
+	echo Couldn''t find wrksrc $builddir/$wrksrc
+	echo 'wrksrc1 should probably be one of'
+	ls $builddir
+	exit no_wrksrc
+}
+
+trystage build
+
+@{
+	rfork ns
+	#ls -l /9bps/unionfs
+	if(! /9bps/unionfs -b -m / -c $installdir /) {
+		echo UNIONFS FAILED
+		exit failed_unionfs
+	}
+	bind -b -c '#e' /env
+
+	cd $builddir/$wrksrc
+
+	trystage install
+}
+
+trystage package
+
+rm -rf $pkgbuild

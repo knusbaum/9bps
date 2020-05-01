@@ -1,64 +1,11 @@
-#!/bin/rc 
+#!/bin/rc
 
-## THESE SHOULD GO AWAY
-stylesdir=/9bps/styles ## SHOULD BECOME /sys/lib/9bps/styles
-template=/9bps/clone.tpl ## Should become an argument
+cur=`{pwd}
 
-files=()
-sums=()
-style=mk
-
-. $stylesdir/base
-if(! . $template) {
-	echo Failed to load $template
-	exit failed_template
-}
-. $stylesdir/$style
-
-if(~ $wrksrc '') {
-	wrksrc=$pkg-$version
-}
-
-fcache=/9bps/pkgcache
-pkgbuild=/9bps/buildroot/$pkg-$version^_$rev
-builddir=$pkgbuild/build
-installdir=$pkgbuild/artifacts/install
-tardir=$pkgbuild/artifacts/tar
-packagedir=/9bps/pkg/$objtype
-rm -rf $pkgbuild
-mkdir -p $pkgbuild
-mkdir -p $fcache
-mkdir -p $builddir
-mkdir -p $installdir
-mkdir -p $tardir
-mkdir -p $packagedir
-cd $builddir
-
-
-trystage fetch
-trystage extract
-
-if(! cd $builddir/$wrksrc) {
-	echo Couldn''t find wrksrc $builddir/$wrksrc
-	echo 'wrksrc1 should probably be one of'
-	ls $builddir
-	exit no_wrksrc
-}
-
-trystage build
-
-@{
-	rfork ns
-	#ls -l /9bps/unionfs
-	if(! /9bps/unionfs -b -m / -c $installdir /) {
-		echo UNIONFS FAILED
-		exit failed_unionfs
-	}
-	bind -b -c '#e' /env
-
-	cd $builddir/$wrksrc
-
-	trystage install
-}
-
-trystage package
+rfork ns
+rootspec=other rootdir=/root/usr/$user/bpsroot auth/newns rc -c '
+	mount -bC -c ''#s/boot'' /oldroot
+	bind -b -c /oldroot/'$cur' /9bps
+	bind -c /oldroot/usr/'$user'/tmp /tmp
+	webfs
+	/9bps/.pkgbuild '^$"*
