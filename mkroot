@@ -1,4 +1,6 @@
-#!/bin/rc -x
+#!/bin/rc
+
+. arches
 
 fn pfx {
 	args=()
@@ -14,16 +16,23 @@ fn pfx {
 bpsroot=/n/other/usr/$user/bpsroot
 bpsrootsrc=$bpsroot^src
 
+if(! test -d /n/other/usr/$user) {
+	echo /n/other/usr/$user does not exist.
+	exit no_other_dir
+}
+
 if(! test -d $bpsrootsrc) {
 	hg clone https://code.9front.org/hg/plan9front $bpsrootsrc
 }
 
 if(test -d $bpsroot) {
-	echo bpsroot already exists.
+	echo bpsroot already exists. Re-creating.
+	echo Deleting old bpsroot.
 	walk -d $bpsroot | sed 's|^(.*)$|''\1''|g' | pfx chmod ug+w | rc
 	rm -r $bpsroot
 }
 
+echo Creating new bpsroot in $bpsroot
 mkdir -p $bpsroot
 dircp /n/other/usr/$user/bpsrootsrc $bpsroot
 mkdir $bpsroot/oldroot
@@ -36,8 +45,6 @@ mkdir -p $bpsroot/tmp
 	. /sys/lib/rootstub
 }
 
-echo DONE BPSROOTSTUB `{pwd}
-
 cat /lib/namespace >/tmp/bpsrootnamespace
 echo 'mount -aC #s/boot /oldroot' >>/tmp/bpsrootnamespace
 echo 'bind -a /oldroot/$objtype/bin /bin' >>/tmp/bpsrootnamespace
@@ -45,16 +52,18 @@ echo 'bind -a /oldroot/$objtype/bin /bin' >>/tmp/bpsrootnamespace
 rootspec=other rootdir=/root/usr/$user/bpsroot auth/newns -n /tmp/bpsrootnamespace /sys/lib/newuser
 rootspec=other rootdir=/root/usr/$user/bpsroot auth/newns -n /tmp/bpsrootnamespace rc -e -c '
 cd /sys/src
-for(arch in ('$cputype' arm arm64 386 amd64 mips)) {
+for(arch in ('$"arches')) {
 	#mkdir -p /$arch/bin
 	#mkdir -p /$arch/lib/ape
 	#mkdir -p /$arch/bin/ape
 	#mkdir -p /acme/bin/$arch
 	#mkdir -p /$arch/bin/aux
-
+	echo BUILDING SYS FOR $arch
 	NPROC=10 nproc=10 objtype=$arch mk install
 }
 
 '
+
+echo Finished building for $arches. Finalizing bpsroot.
 rm /tmp/bpsrootnamespace
 walk $bpsroot | sed 's|^(.*)$|''\1''|g' | pfx chmod ugo-w | rc
