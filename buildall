@@ -1,7 +1,7 @@
 #!/bin/rc
 
 . arches
-
+rfork e
 for(f in `{ls templates}){
 	t=`{basename $f .tpl}
 	for(arch in $arches) {
