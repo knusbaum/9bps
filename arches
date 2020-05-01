@@ -1,1 +1,2 @@
+## Out of the box, 386 amd64 arm arm64 mips seem to work.
 arches=($cputype 386)
