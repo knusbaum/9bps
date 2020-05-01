@@ -1,5 +1,16 @@
 #!/bin/rc -x
 
+fn pfx {
+	args=()
+	for(arg){
+		if(echo $arg | grep -s '[ 	]')
+			args=($args ''''$arg'''')
+		if not
+			args=($args $arg)
+	}
+	sed 's:^:'^$"args^' :g'
+}
+
 bpsroot=/n/other/usr/$user/bpsroot
 bpsrootsrc=$bpsroot^src
 
@@ -13,7 +24,8 @@ if(test -d $bpsroot) {
 	rm -r $bpsroot
 }
 
-clone /n/other/usr/$user/bpsrootsrc $bpsroot
+mkdir -p $bpsroot
+dircp /n/other/usr/$user/bpsrootsrc $bpsroot
 mkdir $bpsroot/oldroot
 mkdir $bpsroot/9bps
 mkdir -p $bpsroot/usr/$user
