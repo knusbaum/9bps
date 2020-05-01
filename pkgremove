@@ -24,3 +24,5 @@ for(f in `$nl{cat $pkgcache/$pkgname/manifest}) {
 }
 
 rm -r $pkgcache/$pkgname
+
+## TODO: pkgremove does not remove directories.

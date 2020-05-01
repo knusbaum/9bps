@@ -12,6 +12,7 @@ fn pkgsplit {
 }
 
 pkg=`{ls pkg/$objtype | grep $pkgname'-([a-zA-Z0-9]+)_([0-9]+).pkg'}
+#echo PKG: $pkg
 
 if(~ $pkg '') {
 	pkg=`{ls pkg/noarch | grep $pkgname'-([a-zA-Z0-9]+)_([0-9]+).pkg'}
@@ -21,4 +22,6 @@ if(~ $pkg '') {
 	}
 }
 
+pwd=`{pwd}
+pkg=$pwd/$pkg
 echo $pkg

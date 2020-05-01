@@ -1,7 +1,17 @@
 #!/bin/rc
 
-cur=`{pwd}
+## TODO:
+## .pkgbuild assumes unionfs is available at /9bps/unionfs
+## This is crappy. Will fix later by forcing unionfs as a dependency
+## when dependency work is done.
+if(! test -f /bin/unionfs) {
+	echo Unionfs must be installed to build packages.
+	exit no_unionfs
+}
+cp /bin/unionfs .
 
+
+cur=`{pwd}
 rfork ns
 rootspec=other rootdir=/root/usr/$user/bpsroot auth/newns rc -c '
 	mount -bC -c ''#s/boot'' /oldroot

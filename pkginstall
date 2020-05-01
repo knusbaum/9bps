@@ -1,28 +1,39 @@
 #!/bin/rc -e
 
-pkgname=$1
+pkgfile=$1
 
-if(~ $pkgname '') {
-	echo Usage: pkginstall [pkgname]
+if(~ $pkgfile '') {
+	echo Usage: pkginstall [pkgfile]
 	exit no_pkgname
 }
 
 tmpcache=/tmp/pkg/
 pkgcache=/sys/lib/pkg
 
-pkgfile=`{pkgfind $pkgname}
-if(~ $pkgfile '') {
-	exit no_package
-}
-pwd=`{pwd}
-pkgfile=$pwd/$pkgfile
+#pkgfile=`{pkgfind $pkgname}
+#if(~ $pkgfile '') {
+#	exit no_package
+#}
+#pwd=`{pwd}
+#pkgfile=$pwd/$pkgfile
 
-echo Found $pkgfile
+#echo Found $pkgfile
+
+if(! test -f $pkgfile) {
+	echo $pkgfile does not exist.
+	echo Usage: pkginstall [pkgfile]
+	echo Example: pkginstall `{pkgfind git9}
+	exit no_pkg
+}
+
+pkgname=`{echo $pkgfile | sed 's|.*/(.+)-([a-zA-Z0-9]+_[0-9]+).pkg|\1|g'}
+#echo PKGNAME: $pkgname
+#exit
 
 mkdir -p $tmpcache/$pkgname
 @{ cd $tmpcache/$pkgname && tar -xvzf $pkgfile }
 
-fn atexit {
+fn sigexit {
 	rm -r $tmpcache/$pkgname
 }
 

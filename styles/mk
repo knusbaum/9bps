@@ -5,7 +5,7 @@ fn build {
 		ls $builddir
 		exit no_wrksrc
 	}
-	mk
+	mk all
 }
 
 fn install {

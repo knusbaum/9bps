@@ -66,6 +66,10 @@ trystage build
 	bind -c '#e' /env
 	bind '#d' /fd
 
+	echo INSTALLDIR:
+	ls -l $installdir
+	#exit fail
+
 	if(test -d $builddir/$wrksrc) {
 		cd $builddir/$wrksrc
 	}
