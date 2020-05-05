@@ -18,4 +18,3 @@ fn post_install {
 	mv $home/bin/$objtype/unionfs /$objtype/bin/unionfs
 	rm -rf /usr
 }
-

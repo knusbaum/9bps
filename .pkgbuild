@@ -1,4 +1,4 @@
-#!/bin/rc 
+#!/bin/rc -x
 
 pname=$1
 if(~ $1 '') {
@@ -31,6 +31,7 @@ if(! ~ $noarch '') {
 
 fcache=/9bps/pkgcache
 pkgbuild=/9bps/buildroot/$pkg-$version^_$rev
+depdir=$pkgbuild/dependencies
 builddir=$pkgbuild/build
 installdir=$pkgbuild/artifacts/install
 tardir=$pkgbuild/artifacts/tar
@@ -38,6 +39,7 @@ packagedir=/9bps/pkg/$targetarch
 rm -rf $pkgbuild
 mkdir -p $pkgbuild
 mkdir -p $fcache
+mkdir -p $depdir
 mkdir -p $builddir
 mkdir -p $installdir
 mkdir -p $tardir
@@ -54,31 +56,99 @@ echo BUILDING $pkg-$version^_$rev for $objtype
 
 trystage fetch
 trystage extract
-trystage build
 
-@{
-	rfork nse
-	#ls -l /9bps/unionfs
-	if(! /9bps/unionfs -b -m / -c $installdir /) {
-		echo UNIONFS FAILED
-		exit failed_unionfs
-	}
-	bind -c '#e' /env
-	bind '#d' /fd
+## Attempt 1
+#@{
+#	rfork nse
+#	if(! /9bps/unionfs -b -m / -c $depdir /) {
+#		echo UNIONFS FAILED
+#		exit failed_unionfs
+#	}
+#	bind -c '#e' /env
+#	bind '#d' /fd
+#	bind -c '#s' /srv
+#
+#	# standard bin
+#	bind /$cputype/bin /bin
+#	bind -a /rc/bin /bin
+#
+#	webfs
+#	hget https://raw.githubusercontent.com/knusbaum/pkg/master/install | rc
+#	chmod +x /bin/pkg/*
+#	srv tcp!pkg.9project.net!565 pkg /n/pkg
+#	du -a /n/pkg
+#	for(dep in $hostmakedeps) {
+#		pkg/install $dep
+#		exit testdep
+#	}
+#
+#	cd $builddir
+#	trystage build
+#}
 
-	echo INSTALLDIR:
-	ls -l $installdir
-	#exit fail
+## Attempt 2
+#if(! /9bps/unionfs -s 9bpsunion -c $depdir /) {
+#	echo UNIONFS FAILED
+#	exit failed_unionfs
+#}
+#
+#auth/newns -d -n /9bps/mountns rc -x -c '
+#	webfs
+#	trystage deps
+#	cd $builddir
+#	trystage build
+#'
+#
+#rm /srv/9bpsunion
 
-	if(test -d $builddir/$wrksrc) {
-		cd $builddir/$wrksrc
+## Attempt 3
+/9bps/.run9bpsns $depdir / '
+	webfs
+	trystage deps
+	cd $builddir
+	trystage build
+'
+if(! ~ $status '') {
+	echo Build failed.
+	exit build_failed
+}
+
+## Attempt 1
+#@{
+#	rfork nse
+#	#ls -l /9bps/unionfs
+#	if(! /9bps/unionfs -b -m / -c $installdir $depdir /) {
+#		echo UNIONFS FAILED
+#		exit failed_unionfs
+#	}
+#	bind -c '#e' /env
+#	bind '#d' /fd
+#
+#	echo INSTALLDIR:
+#	ls -l $installdir
+#	#exit fail
+#
+#	if(test -d $builddir/$wrksrc) {
+#		cd $builddir/$wrksrc
+#	}
+#
+#	trystage install
+#}
+#if(! ~ $status '') {
+#	echo Install failed.
+#	exit install_failed
+#}
+
+/9bps/.run9bpsns $installdir $depdir / '
+	cd $builddir
+	if(test -d $wrksrc) {
+		cd $wrksrc
 	}
 
 	trystage install
-}
+'
 
 trystage normalize
-
 trystage package
 
-rm -rf $pkgbuild
+#rm -rf $pkgbuild

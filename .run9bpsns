@@ -1,0 +1,27 @@
+#!/bin/rc -x
+
+
+last=`{echo $#* - 1 | bc}
+echo dirs: $*(1-$last)
+echo script: $*($#*)
+
+dirs=$*(1-$last)
+script=$*($#*)
+
+if(! /9bps/unionfs -s 9bpsunion -c $dirs) {
+	echo UNIONFS FAILED
+	exit failed_unionfs
+}
+
+fn sigexit {
+	rm /srv/9bpsunion
+}
+
+auth/newns -d -n /9bps/mountns rc -x -c $script
+
+#'
+#	webfs
+#	trystage deps
+#	cd $builddir
+#	trystage build
+#'

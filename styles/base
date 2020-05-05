@@ -2,6 +2,8 @@ fn pre_fetch {}
 fn post_fetch {}
 fn pre_extract {}
 fn post_extract {}
+fn pre_deps {}
+fn post_deps {}
 fn pre_build {}
 fn post_build {}
 fn pre_install {}
@@ -19,17 +21,18 @@ fn extractfile {
 	file=$1
 	ret='notfound'
 	if(~ $file (*.tar.gz *.tgz)) {
-		echo $file is a gzipped tarball.
+		#echo $file is a gzipped tarball.
 		tar -xzf $file
 		ret=$status
 	}
 	if(~ $file *.tar) {
-		echo $file is a tarball.
+		#echo $file is a tarball.
 		tar -xf $file
 		ret=$status
 	}
 	if(~ $file *.zip) {
-		echo $file is a zip.
+		#echo $file is a zip.
+		echo WARNING: unzip does not preserve file permissions. Consider using tar.
 		unzip -f $file
 		ret=$status
 	}
@@ -87,6 +90,17 @@ fn extract {
 		#echo DONE EXTRACTING $fcache/$basef
 	}
 	status=''
+}
+
+fn deps {
+	hget https://raw.githubusercontent.com/knusbaum/pkg/master/install | rc
+	chmod +x /bin/pkg/*
+	srv tcp!pkg.9project.net!565 pkg /n/pkg
+	du -a /n/pkg
+	for(dep in $hostmakedeps) {
+		pkg/install $dep
+		exit testdep
+	}
 }
 
 fn normalize {

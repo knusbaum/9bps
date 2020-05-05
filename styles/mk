@@ -1,14 +1,17 @@
-fn build {
-	if(! cd $builddir/$wrksrc) {
-		echo Couldn''t find wrksrc $builddir/$wrksrc
-		echo 'wrksrc1 should probably be one of'
-		ls $builddir
-		exit no_wrksrc
+if(! whatis build) {
+	fn build {
+		if(! cd $wrksrc) {
+			echo Couldn''t find wrksrc $builddir/$wrksrc
+			echo 'wrksrc should probably be one of'
+			ls
+			exit no_wrksrc
+		}
+		mk all
 	}
-	mk all
 }
 
-fn install {
-	mk install
+if(! whatis install) {
+	fn install {
+		mk install
+	}
 }
-

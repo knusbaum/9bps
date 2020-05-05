@@ -1,3 +1,2 @@
-#fn fetch{}
 fn extract {}
 fn build {}

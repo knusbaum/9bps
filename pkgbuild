@@ -15,7 +15,7 @@ cur=`{pwd}
 rfork ns
 rootspec=other rootdir=/root/usr/$user/bpsroot auth/newns rc -c '
 	mount -bC -c ''#s/boot'' /oldroot
-	bind -b -c /oldroot/'$cur' /9bps
-	bind -c /oldroot/usr/'$user'/tmp /tmp
+	bind -b -c /oldroot/$cur /9bps
+	bind -c /oldroot/usr/$user/tmp /tmp
 	webfs
 	/9bps/.pkgbuild '^$"*
