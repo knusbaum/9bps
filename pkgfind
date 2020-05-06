@@ -1,5 +1,7 @@
 #!/bin/rc
 
+rfork e
+
 pkgname=$1
 
 if(~ $pkgname '') {
@@ -11,11 +13,10 @@ fn pkgsplit {
 	sed 's|.*/(.+)-([a-zA-Z0-9]+_[0-9]+).pkg|\1	\2|g'
 }
 
-pkg=`{ls pkg/$objtype | grep $pkgname'-([a-zA-Z0-9]+)_([0-9]+).pkg'}
-#echo PKG: $pkg
+pkg=`{ls /n/pkg/$objtype | grep $pkgname'-([a-zA-Z0-9.]+)_([0-9]+).pkg'}
 
 if(~ $pkg '') {
-	pkg=`{ls pkg/noarch | grep $pkgname'-([a-zA-Z0-9]+)_([0-9]+).pkg'}
+	pkg=`{ls /n/pkg/noarch | grep $pkgname'-([a-zA-Z0-9.]+)_([0-9]+).pkg'}
 	if(~ $pkg '') {
 		echo Could not find $pkgname >[1=2]
 		exit no_pkg
@@ -25,3 +26,4 @@ if(~ $pkg '') {
 pwd=`{pwd}
 pkg=$pwd/$pkg
 echo $pkg
+status=''

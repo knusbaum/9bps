@@ -5,8 +5,10 @@ fn post_extract {}
 fn pre_deps {}
 fn post_deps {}
 fn pre_build {}
+fn build
 fn post_build {}
 fn pre_install {}
+fn install
 fn post_install {}
 fn pre_normalize {}
 fn post_normalize {}
@@ -93,13 +95,15 @@ fn extract {
 }
 
 fn deps {
-	hget https://raw.githubusercontent.com/knusbaum/pkg/master/install | rc
+	if(! hget https://raw.githubusercontent.com/knusbaum/pkg/master/install | rc) {
+		echo FAILED TO INSTALL pkg.
+		exit pkg_failed
+	}
 	chmod +x /bin/pkg/*
-	srv tcp!pkg.9project.net!565 pkg /n/pkg
 	du -a /n/pkg
 	for(dep in $hostmakedeps) {
+		echo INSTALLING $dep
 		pkg/install $dep
-		exit testdep
 	}
 }
 
@@ -129,7 +133,7 @@ fn package {
 
 fn try {
 	status=''
-	#echo TRY $*
+	echo TRY $*
 	$*
 	r=$status
 	if(! ~ $r '') {

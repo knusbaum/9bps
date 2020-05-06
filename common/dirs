@@ -1,0 +1,11 @@
+if(~ $9bpsdir '') {
+	9bpsdir=`{pwd}
+}
+
+fcache=$9bpsdir/pkgcache
+pkgbuild=$9bpsdir/buildroot/$pkg-$version^_$rev
+packagedir=$9bpsdir/pkg/$targetarch
+depdir=$pkgbuild/dependencies
+builddir=$pkgbuild/build
+installdir=$pkgbuild/artifacts/install
+tardir=$pkgbuild/artifacts/tar
