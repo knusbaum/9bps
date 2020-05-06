@@ -1,0 +1,20 @@
+#!/bin/rc
+
+rfork e
+last=`{echo $#* - 1 | bc}
+dirs=$*(1-$last)
+script=$*($#*)
+
+rm -f /srv/9bpsunion
+
+if(! $9bpsdir/unionfs -s 9bpsunion -c $dirs) {
+	echo UNIONFS FAILED
+	exit failed_unionfs
+}
+
+fn sigexit {
+	rm /srv/9bpsunion
+}
+
+cur=`{pwd}
+auth/newns -n $9bpsdir/mountns rc -c $script

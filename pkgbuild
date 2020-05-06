@@ -1,21 +1,146 @@
 #!/bin/rc
 
-## TODO:
-## .pkgbuild assumes unionfs is available at /9bps/unionfs
-## This is crappy. Will fix later by forcing unionfs as a dependency
-## when dependency work is done.
-if(! test -f /bin/unionfs) {
-	echo Unionfs must be installed to build packages.
-	exit no_unionfs
+
+
+pname=$1
+if(~ $1 '') {
+	echo 'Usage: pkgbuild [package name]'
+	exit bad_args
 }
-cp /bin/unionfs .
 
+stylesdir=styles 
+templatedir=templates
 
-cur=`{pwd}
-rfork ns
-rootspec=other rootdir=/root/usr/$user/bpsroot auth/newns rc -c '
-	mount -bC -c ''#s/boot'' /oldroot
-	bind -b -c /oldroot/$cur /9bps
-	bind -c /oldroot/usr/$user/tmp /tmp
+template=$templatedir/$pname^.tpl
+
+files=()
+sums=()
+hostmakedeps=()
+makedeps=()
+deps=()
+style=mk
+
+. $stylesdir/base
+try . $template
+. $stylesdir/$style
+
+echo 9bsdir: $9bpsdir
+if(~ $wrksrc '') {
+	wrksrc=$pkg-$version
+}
+
+targetarch=$objtype
+if(! ~ $noarch '') {
+	targetarch=noarch
+}
+
+. common/dirs
+rm -rf $pkgbuild
+mkdir -p $fcache
+mkdir -p $pkgbuild
+mkdir -p $packagedir
+mkdir -p $depdir
+mkdir -p $builddir
+mkdir -p $installdir
+mkdir -p $tardir
+
+if(test -f $builddir/$packagedir/$pkg-$version^_$rev.pkg) {
+	echo $pkg-$version $targetarch already built.
+	exit already_built
+}
+
+echo BUILDING $pkg-$version^_$rev for $objtype
+
+rfork ne
+
+## Bind our pkg over /n/pkg for finding deps.
+srv tcp!pkg.9project.net!565 pkg /n/remotepkg
+#bind -b -c pkg /n/localpkg
+rm -f /srv/buildpkg
+if(! unionfs -m /n/pkg -s buildpkg -c ./pkg /n/remotepkg) {
+	echo Failed to unionfs.
+}
+#bind -c buildpkg /n/pkg
+
+#echo STARTING BUILD FOR $pname INSPECTING WITH SHELL. ^D TO CONTINUE.
+#rc
+
+echo 9bsdir: $9bpsdir
+echo HOSTMAKEDEPS: $hostmakedeps
+checkdeps=$hostmakedeps
+if(! ~ $pkg pkg) {
+	echo UPGRADING HOSTMAKEDEPS...
+	## All packages except pkg depend on pkg.
+	checkdeps=(pkg $hostmakedeps)
+}
+
+cd $9bpsdir
+echo Checking for deps $"hostmakedeps for package $pkg
+for(dep in $checkdeps) {
+	if(! ./pkgfind $dep) {
+		echo COULD NOT FIND DEPENDENCY $dep FOR PACKAGE $pkg
+		if(~ $dep $pkg) {
+			echo CANNOT BUILD DEPENDENCY $dep FOR PACKAGE $pkg.
+			echo DOES $pkg NEED BOOTSTRAPPING FROM ANOTHER ARCH?
+			exit bad_deps
+		}
+		if(! ./pkgbuild $dep) {
+			echo FAILED TO BUILD DEPENDENCY $dep
+			exit failed_dep
+		}
+		if(! ./pkgfind $dep) {
+			echo SUCCESSFULLY BUILD $dep BUT FAILED TO FIND IT.
+			exit failed_dep
+		}
+	}
+}
+
+trystage fetch
+trystage extract
+
+$9bpsdir/common/run9bpsns $depdir /n/other/usr/$user/bpsroot '
+	9bpsdir=/9bps
+	. /9bps/common/dirs
+
 	webfs
-	/9bps/.pkgbuild '^$"*
+	trystage deps
+'
+if(! ~ $status '') {
+	echo Dependency failed.
+	exit deps_failed
+}
+
+echo STARTING BUILD
+$9bpsdir/common/run9bpsns $depdir /n/other/usr/$user/bpsroot '
+	9bpsdir=/9bps
+	. /9bps/common/dirs
+
+	cd $builddir
+	trystage build
+'
+if(! ~ $status '') {
+	echo Build failed.
+	exit build_failed
+}
+
+echo STARTING INSTALL
+$9bpsdir/common/run9bpsns $installdir /n/other/usr/$user/bpsroot '
+	9bpsdir=/9bps
+	. /9bps/common/dirs
+
+	cd $builddir
+	if(test -d $wrksrc) {
+		cd $wrksrc
+	}
+
+	trystage install
+'
+if(! ~ $status '') {
+	echo Install failed.
+	exit install_failed
+}
+
+trystage normalize
+trystage package
+
+#rm -rf $pkgbuild
