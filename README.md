@@ -11,6 +11,8 @@ Building with 9bps relies on [`unionfs`](http://code.a-b.xyz/unionfs)
 
 ## Use
 
+### building packages
+
 First, configure which arches you want to build for in the `arches` file.
 The bpsroot will be constructed so that it can build against the arches listed there. By default it
 sets up bpsroot to build for `$cputype` and `386`. Arches can be added later with `rootaddarch`.
@@ -33,16 +35,9 @@ objtype=arm64 pkgbuild clone
 
 If you want to build all packages for all arches listed in the `arches` file, run `buildall`.
 
-After the package (in this case `clone`) is built, it can be installed like this:
-```
-pkginstall `{pkgfind clone}
-```
-(in order to install packages, the /sys/lib/pkg directory must exist. The package files and metadata will be copied under this directory.)
+### installing packages
 
-A package can be removed with `pkgremove`:
-```
-pkgremove clone
-```
+Installation can be done with the [`pkg` scripts](https://github.com/knusbaum/pkg). The `pkg` directory constructed by `pkgbuild` is suitable for mounting over `/n/pkg`
 
 ## Updating bpsroot
 
@@ -58,9 +53,10 @@ git9/clone git://github.com/knusbaum/9bps
 cd 9bps
 mkroot
 pkgbuild clone
-pkginstall `{pkgfind clone}
+bind pkg /n/pkg
+pkg/install clone
 ## use clone
-pkgremove clone
+pkg/remove clone
 ```
 
 ## Warning
