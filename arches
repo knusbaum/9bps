@@ -1,1 +1,1 @@
-arches=($cputype 386)
+allarch=($cputype 386 arm arm64 mips)

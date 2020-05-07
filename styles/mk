@@ -1,5 +1,5 @@
-
-if(! whatis build) {
+whatis build >/dev/null >[2=1]
+if(! ~ $status '') {
 	fn build {
 		if(! cd $wrksrc) {
 			echo Couldn''t find wrksrc $builddir/$wrksrc
@@ -11,9 +11,9 @@ if(! whatis build) {
 	}
 }
 
-if(! whatis install) {
+whatis install >/dev/null >[2=1]
+if(! ~ $status '') {
 	fn install {
 		mk install
 	}
 }
-
