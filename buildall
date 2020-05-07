@@ -4,7 +4,7 @@
 rfork e
 for(f in `{ls templates}){
 	t=`{basename $f .tpl}
-	for(arch in $arches) {
+	for(arch in $allarch) {
 		objtype=$arch pkgbuild $t
 	}
 }

@@ -8,6 +8,7 @@ description='Bootstrap code for go'
 
 files='https://github.com/golang/go/archive/go1.4.3.tar.gz'
 sums='fc5b37f07357ad2672db4b893529d627b24e3889'
+arches=($cputype) # Doesn't seem to cross-compile.
 
 fn build {
 	cd $wrksrc/src

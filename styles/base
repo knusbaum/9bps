@@ -99,12 +99,16 @@ fn deps {
 		echo FAILED TO INSTALL pkg.
 		exit pkg_failed
 	}
-	chmod +x /bin/pkg/*
-	du -a /n/pkg
+	#chmod +x /bin/pkg/*
+	#du -a /n/pkg
 	for(dep in $hostmakedeps) {
 		echo INSTALLING $dep
-		pkg/install $dep
+		if(! objtype=$cputype pkg/install $dep) {
+			echo FAILED TO INSTALL DEPENDENCY $dep
+			exit dep_failed.
+		}
 	}
+	status=''
 }
 
 fn normalize {
@@ -128,12 +132,12 @@ fn package {
 	echo 'arch='$targetarch >>meta
 	echo 'maintainer='''$maintainer'''' >>meta
 	echo 'description='''$description'''' >>meta
-	tar -cvzf $packagedir/$pkg-$version^_$rev.pkg *
+	tar -czf $packagedir/$pkg-$version^_$rev.pkg *
 }
 
 fn try {
 	status=''
-	echo TRY $*
+	#echo TRY $*
 	$*
 	r=$status
 	if(! ~ $r '') {

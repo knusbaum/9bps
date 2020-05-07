@@ -52,7 +52,7 @@ echo 'bind -a /oldroot/$objtype/bin /bin' >>/tmp/bpsrootnamespace
 rootspec=other rootdir=/root/usr/$user/bpsroot auth/newns -n /tmp/bpsrootnamespace /sys/lib/newuser
 rootspec=other rootdir=/root/usr/$user/bpsroot auth/newns -n /tmp/bpsrootnamespace rc -e -c '
 cd /sys/src
-for(arch in ('$"arches')) {
+for(arch in ('$"allarch')) {
 	#mkdir -p /$arch/bin
 	#mkdir -p /$arch/lib/ape
 	#mkdir -p /$arch/bin/ape
@@ -64,6 +64,6 @@ for(arch in ('$"arches')) {
 
 '
 
-echo Finished building for $arches. Finalizing bpsroot.
+echo Finished building for $"allarch. Finalizing bpsroot.
 rm /tmp/bpsrootnamespace
 walk $bpsroot | sed 's|^(.*)$|''\1''|g' | pfx chmod ugo-w | rc

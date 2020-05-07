@@ -29,16 +29,31 @@ if not {
 
 files='https://github.com/golang/go/archive/go1.13.10.tar.gz'
 sums='5c3ddb360c50fb79c16edb673c6a7670808af251'
+arches=(386 amd64 arm)
 
 fn build {
 	echo BUILDING GO
 	cd $wrksrc/src
-	GOROOT_FINAL=/sys/lib/go GOROOT_BOOTSTRAP=/sys/lib/go ./make.rc
+	GOOS=plan9 GOARCH=$objtype GOROOT_FINAL=/sys/lib/go GOROOT_BOOTSTRAP=/sys/lib/go ./make.rc
+	#GOOS=plan9 GOARCH=$objtype GOROOT_FINAL=/sys/lib/go ./make.rc
 }
 
 fn install {
-	mkdir /sys/lib/go
 	cd ..
+	mkdir /sys/lib/go
 	dircp $wrksrc /sys/lib/go
-	cp /sys/lib/go/bin/go /$objtype/bin/
+
+	if(! ~ $cputype $objtype) {
+		# make.rc puts cross-compiled binaries in $wrksrc/bin/plan9_$objtype
+		
+		# remove the $cputype binaries
+		rm -f /sys/lib/go/bin/*
+
+		# copy the binaries we want into place.
+		cp /sys/lib/go/bin/plan9_$objtype/* /sys/lib/go/bin/
+		rm -r /sys/lib/go/bin/plan9_$objtype
+	}
+
+	## Copy the go binaries into the correct bin directory.
+	cp /sys/lib/go/bin/* /$objtype/bin/
 }
