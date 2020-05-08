@@ -1,0 +1,24 @@
+</$objtype/mkfile
+CC=pcc
+## Need to use 9bps's $installdir, since spin already exists in 9front.
+## This could be fixed in unionfs.
+BIN=$installdir/$objtype/bin
+TARG=spin
+CFLAGS= -D_POSIX_SOURCE -D_BSD_EXTENSION -DPlan9 -DNXT  -I. -c
+
+SPIN_OS= spinlex.$O sym.$O vars.$O main.$O msc_tcl.$O \
+	mesg.$O flow.$O sched.$O run.$O pangen1.$O pangen2.$O \
+	pangen3.$O pangen4.$O pangen5.$O guided.$O dstep.$O \
+	structs.$O pangen6.$O pangen7.$O reprosrc.$O
+
+TL_OS=	tl_parse.$O tl_lex.$O tl_main.$O tl_trans.$O tl_buchi.$O \
+	tl_mem.$O tl_rewrt.$O tl_cache.$O
+
+OFILES=${SPIN_OS} ${TL_OS} y.tab.$O
+YFILES=spin.y
+
+</sys/src/cmd/mkone
+
+YFLAGS=$YFLAGS -S
+
+%.$O: y.tab.h

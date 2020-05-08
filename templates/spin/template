@@ -1,0 +1,31 @@
+pkg=spin
+version=6.5.2
+rev=1
+style=mk
+wrksrc=Spin-version-$version
+maintainer='Kyle Nusbaum <knusbaum@sdf.org>'
+description='formal software verification tool from Bell Labs'
+
+files='https://github.com/nimble-code/Spin/archive/version-'$version'.tar.gz'
+sums='d4addf8017e8b4497da960973200139d91dbe705'
+
+fn build {
+	cd Src
+	cp $filesdir/mkfile .
+	echo RUNNING BUILD
+	prompt='(BUILD) '$prompt rc
+	mk all
+}
+
+fn pre_install {
+	cd Src
+	## Write directly to $installdir since /amd64/bin/spin exists in 9front.
+	mkdir -p $installdir/amd64/bin
+}
+
+#fn install {
+#	cd Src
+#	echo RUNNING INSTALL
+#	prompt='(INSTALL) '$prompt rc
+#	mk install
+#}

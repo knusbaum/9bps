@@ -35,10 +35,17 @@ mount -a /srv/cs /net
 mount -a /srv/dns /net
 mount -a /srv/net /net
 
+## Mount old root on /oldroot.
+## this sucks because it requires 9bps to
+## actually be at $cur an #s/boot, not just
+## mounted/bound there. We actually want 
+## $cur in the calling namespace. 
+## Maybe we can fix this with export.
+## That should also eliminate the need for
+## the crappy #s/buildpkg.
 mount -bC -c #s/boot /oldroot
 bind -b -c /oldroot/$cur /9bps
 bind -c /oldroot/usr/$user/tmp /tmp
-#bind -c /oldroot/$cur/buildpkg /n/pkg
 mount -c -aC #s/buildpkg /n/pkg
 
 bind -c /usr/$user/tmp /tmp

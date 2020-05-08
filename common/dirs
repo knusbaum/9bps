@@ -9,3 +9,5 @@ depdir=$pkgbuild/dependencies
 builddir=$pkgbuild/build
 installdir=$pkgbuild/artifacts/install
 tardir=$pkgbuild/artifacts/tar
+filesdir=$9bpsdir/templates/$pkg/files
+patchdir=$9bpsdir/templates/$pkg/patches

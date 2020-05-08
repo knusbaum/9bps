@@ -11,7 +11,7 @@ if(~ $1 '') {
 stylesdir=styles 
 templatedir=templates
 
-template=$templatedir/$pname^.tpl
+template=$templatedir/$pname/template
 
 noarch=()
 arches=()
@@ -60,20 +60,6 @@ if(test -f /n/pkg/$targetarch/$pkg-$version^_$rev.pkg) {
 	exit already_built
 }
 
-if(! ~ $targetarch $arches) {
-	echo $targetarch not in $arches
-}
-if not {
-	echo $targetarch IS IN $arches
-}
-
-if(test $#arches -gt 0) {
-	echo $#arches gt 0
-}
-if not {
-	echo $#arches NOT gt 0
-}
-
 if(! ~ $targetarch $arches && test $#arches -gt 0) {
 	echo Cannot build $pkg-$version^_$rev for $objtype
 	echo Valid arches for $pkg-$version^_$rev are $arches
@@ -82,6 +68,8 @@ if(! ~ $targetarch $arches && test $#arches -gt 0) {
 
 echo BUILDING $pkg-$version^_$rev for $objtype
 
+cp /bin/unionfs $9bpsdir/
+webfs
 @{
 	rfork e
 	checkdeps=$hostmakedeps
@@ -126,6 +114,22 @@ $9bpsdir/common/run9bpsns $depdir /n/other/usr/$user/bpsroot '
 	. /9bps/common/dirs
 
 	webfs
+	cd $builddir
+	if(test -d $wrksrc) {
+		cd $wrksrc
+	}
+	trystage patch
+'
+if(! ~ $status '') {
+	echo Patch failed.
+	exit patch_failed
+}
+
+$9bpsdir/common/run9bpsns $depdir /n/other/usr/$user/bpsroot '
+	9bpsdir=/9bps
+	. /9bps/common/dirs
+
+	webfs
 	trystage deps
 '
 if(! ~ $status '') {
@@ -140,6 +144,9 @@ $9bpsdir/common/run9bpsns $depdir /n/other/usr/$user/bpsroot '
 
 	webfs
 	cd $builddir
+	if(test -d $wrksrc) {
+		cd $wrksrc
+	}
 	trystage build
 '
 if(! ~ $status '') {
@@ -156,7 +163,6 @@ $9bpsdir/common/run9bpsns $installdir /n/other/usr/$user/bpsroot '
 	if(test -d $wrksrc) {
 		cd $wrksrc
 	}
-
 	trystage install
 '
 if(! ~ $status '') {

@@ -1,13 +1,17 @@
 fn pre_fetch {}
 fn post_fetch {}
-fn pre_extract {}
-fn post_extract {}
 fn pre_deps {}
 fn post_deps {}
+fn pre_extract {}
+fn post_extract {}
+fn pre_patch {}
+fn post_patch {}
 fn pre_build {}
+fn build {}
 fn build
 fn post_build {}
 fn pre_install {}
+fn install {}
 fn install
 fn post_install {}
 fn pre_normalize {}
@@ -48,7 +52,7 @@ fn fetch {
 		basef=`{basename $f}
 
 		if(test -f $fcache/$basef) {
-			echo Found $basef in cache
+#			echo Found $basef in cache
 			status=''
 		}
 		if not {
@@ -57,18 +61,18 @@ fn fetch {
 				echo Failed to fetch $f
 				exit 'bad_fetch'
 			}
-			if not {
-				echo Fetched $f to $fcache/$basef
-			}
+#			if not {
+#				echo Fetched $f to $fcache/$basef
+#			}
 		}
 		sha=`{sha1 $fcache/$basef}
 		if(! ~ $sha $s) {
 			echo Expected sha1sum $s but $f has sum $sha
 			exit 'bad_sha1sum'
 		}
-		if not {
-			echo Sums match '(' $s ')'
-		}
+#		if not {
+#			echo Sums match '(' $s ')'
+#		}
 	}
 	status=''
 }
@@ -106,6 +110,18 @@ fn deps {
 		if(! objtype=$cputype pkg/install $dep) {
 			echo FAILED TO INSTALL DEPENDENCY $dep
 			exit dep_failed.
+		}
+	}
+	status=''
+}
+
+fn patch {
+	lc
+	pwd
+	for(patch in `{ls $patchdir}) {
+		if(! ape/patch -p 0 -u -i $patch) {
+			echo Patch $patch failed to apply.
+			exit patch_failed
 		}
 	}
 	status=''

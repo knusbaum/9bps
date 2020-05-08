@@ -1,0 +1,69 @@
+--- Src/main.c	Fri May  8 09:57:54 2020
++++ Src/main.c	Fri May  8 09:57:54 2020
+@@ -862,11 +862,11 @@
+ 	tmp = (char *) emalloc(strlen(pan_runtime)+strlen(s)+2);
+ 	sprintf(tmp, "%s %s", pan_runtime, s);
+ 	pan_runtime = tmp;
+ }
+ 
+-#ifdef __MINGW32__
++#if defined(__MINGW32__) || defined(Plan9)
+ 	/* mingw on PCs doesn't have a definition of getline
+ 	 * so we fall back on using a fixed size buffer, to
+ 	 * avoid having to reimplement getline here·..
+ 	 */
+ ssize_t
+@@ -1226,10 +1226,11 @@
+ 		fflush(tl_out);
+ 		/* should read this file after the main file is read */
+ 	}
+ }
+ 
++#ifndef Plan9
+ void
+ non_fatal(char *s1, char *s2)
+ {	extern int yychar; extern char yytext[];
+ 
+ 	printf("spin: %s:%d, Error: ",
+@@ -1253,10 +1254,26 @@
+ 	if (strlen(yytext)>1)
+ 		printf(" near '%s'", yytext);
+ 	printf("\n");
+ 	nr_errs++;
+ }
++#endif
++
++#ifdef Plan9
++void
++non_fatal(char *s1, char *s2)
++{	extern char yytext[];
++
++	printf("spin: %s:%d, Error: ",
++		Fname?Fname->name:(oFname?oFname->name:"nofilename"), lineno);
++	printf(s1, s2);
++	if (strlen(yytext)>1)
++		printf(" near '%s'", yytext);
++	printf("\n");
++	nr_errs++;
++}
++#endif
+ 
+ void
+ fatal(char *s1, char *s2)
+ {
+ 	non_fatal(s1, s2);
+--- Src/spin.h	Fri May  8 09:57:54 2020
++++ Src/spin.h	Fri May  8 09:57:54 2020
+@@ -13,11 +13,11 @@
+ #include <string.h>
+ #include <ctype.h>
+ #if !defined(WIN32) && !defined(WIN64)
+  #include <unistd.h>
+ #endif
+-#ifndef PC
++#if !defined(PC) && !defined(Plan9)
+  #include <memory.h>
+ #endif
+ 
+ enum	    { INIV, PUTV, LOGV }; /* used in pangen1.c */
+ enum btypes { NONE, N_CLAIM, I_PROC, A_PROC, P_PROC, E_TRACE, N_TRACE };
