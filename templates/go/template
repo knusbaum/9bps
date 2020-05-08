@@ -35,7 +35,6 @@ fn build {
 	echo BUILDING GO
 	cd $wrksrc/src
 	GOOS=plan9 GOARCH=$objtype GOROOT_FINAL=/sys/lib/go GOROOT_BOOTSTRAP=/sys/lib/go ./make.rc
-	#GOOS=plan9 GOARCH=$objtype GOROOT_FINAL=/sys/lib/go ./make.rc
 }
 
 fn install {

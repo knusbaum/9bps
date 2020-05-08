@@ -1,3 +1,9 @@
+## I would like to get rid of $9bpsdir altogether. 
+## We should be able to mount $9bpsdir on /mnt/9bps and
+## forget about this. Then we don't have to re-source
+## $9bpsdir/common/dirs when we shift into the bpsroot
+## namespace.
+
 if(~ $9bpsdir '') {
 	9bpsdir=`{pwd}
 }

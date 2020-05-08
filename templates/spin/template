@@ -20,12 +20,6 @@ fn build {
 fn pre_install {
 	cd Src
 	## Write directly to $installdir since /amd64/bin/spin exists in 9front.
+	## This is handled (grossly) by the mkfile right now.
 	mkdir -p $installdir/amd64/bin
 }
-
-#fn install {
-#	cd Src
-#	echo RUNNING INSTALL
-#	prompt='(INSTALL) '$prompt rc
-#	mk install
-#}
