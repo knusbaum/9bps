@@ -7,7 +7,7 @@ It expects a 9front system, and constructs a new 9front root in `/n/other/usr/$u
 
 9bps expects to be checked out onto a 9front system, onto the root FS (not in ramfs/etc.), and have all scripts executed from the checked-out directory. This is an inconvenient restriction that will be fixed. Eventually, the programs/directories will be moved into sensible locations, but that has not happened yet.
 
-Building with 9bps relies on [`unionfs`](http://code.a-b.xyz/unionfs). Unionfs is available for 386 and amd64 through [pkg](https://github.com/knusbaum/pkg)
+Building with 9bps relies on [`unionfs`](http://code.a-b.xyz/unionfs). Unionfs is available for 386 and amd64 through [bps](https://git.sr.ht/~kjn/bps)
 
 ## Use
 
@@ -22,7 +22,7 @@ have selected a lot of arches. `mkroot` requires `/n/other/usr/$user` to exist. 
 will recreate the bpsroot.
 
 After bpsroot is created with `mkroot`, packages can be build under that root. The packages will
-be installed into `pkg/$objtype` in the 9bps directory. Packages are built from templates under `templates`.
+be installed into `bps/$objtype` in the 9bps directory. Packages are built from templates under `templates`.
 You should be able to add your own package templates under `templates`. Please use the existing templates in `templates` as examples. Currently 9bps only supports building with `mk`, or fetching files to install.
 
 A package can be built with `pkgbuild [package name]`.
@@ -42,7 +42,7 @@ The pkgbuild script goes through a number of stages to produce a `.pkg` file fro
 ### .pkg files
 The `.pkg` file is a gzipped tar file (`.tar.gz`) that contains 3 files:
  * meta - a file sourcable by rc that defines several variables like pkg (package name), version (package version), arch (architecture the package is for), description, and maintainer.
- * manifest - a file that contains a list of files *owned* by the package. `pkg/remove` will delete all files listed in the package manifest. In practice so far, this manifest always reflects what is contained in the root.tar file. It may differ in the future in special cases, for example if root.tar installs a default config and we don't want to delete that config on `pkg/remove`. The config file will exist in root.tar, but won't be in manifest, and therefore not *owned* by the package and not removed by `pkg/remove`. It remains to be seen whether this is a good idea or not. Side note: We may want a `pkg/nuke` that will remove everything installed by root.tar, not just what is in the manifest.
+ * manifest - a file that contains a list of files *owned* by the package. `bps/remove` will delete all files listed in the package manifest. In practice so far, this manifest always reflects what is contained in the root.tar file. It may differ in the future in special cases, for example if root.tar installs a default config and we don't want to delete that config on `bps/remove`. The config file will exist in root.tar, but won't be in manifest, and therefore not *owned* by the package and not removed by `bps/remove`. It remains to be seen whether this is a good idea or not. Side note: We may want a `bps/nuke` that will remove everything installed by root.tar, not just what is in the manifest.
  * root.tar - the file containing the package's contents. This tarball is meant to be unpacked or unioned with /.
 
 ### Template 
@@ -72,8 +72,8 @@ Additional variables are optional, but may be required to get a package to build
 	In the case that you have only one source artifact in `$files`, 9bps will try to extract that artifact if it is a tarball or zip file (See the extract stage below), expecting the package source to be in there. By default, 9bps expects the source artifact to extract into a directory named `$pkg-$version`. This is a comman pattern, but not always the case. If your source artifact has a different top-level directory, set `wrksrc=[my-source-tarball-top-directory]` in the template. See [`templates/spin/template`](templates/spin/template) for an example of defining `wrksrc`.
 * `arches` - A list containing the set of arches the package will build for. Useful if the package will only build for a subset of the architectures that 9front runs on. If not defined, 9bps assumes it will build for all arches.
 * `noarch` - If defined at all, it marks this package as architecture-independent, meaning it contains no architecture-specific files. Useful, for example, for packages containing only rc scripts.
-* `hostmakedeps` - A list of packages that the host needs to have installed in order to build the package. (`objtype=$cputype pkg/install`) These will be built if necessary, and installed into an overlay on bpsroot before the build is run.
-* `makedeps` - A list of packages that the host needs to have installed *in the target architecture* in order to build the package. (`pkg/install`) **This is not currently working**
+* `hostmakedeps` - A list of packages that the host needs to have installed in order to build the package. (`objtype=$cputype bps/install`) These will be built if necessary, and installed into an overlay on bpsroot before the build is run.
+* `makedeps` - A list of packages that the host needs to have installed *in the target architecture* in order to build the package. (`bps/install`) **This is not currently working**
 * `dependencies` - A list of packages that the package depends on at runtime, which need to be installed on any system that installs this package. **This is not currently working**
 
 The template may also define functions that will be called during the various stages. They are described in the Stages section.
@@ -119,7 +119,7 @@ Each build goes through these stages in order:
 
 ## installing packages
 
-Installation can be done with the [`pkg` scripts](https://github.com/knusbaum/pkg). The `pkg` directory constructed by `pkgbuild` is suitable for mounting over `/n/pkg`
+Installation can be done with the [`bps` scripts](https://git.sr.ht/~kjn/bps). The `bps` directory constructed by `pkgbuild` is suitable for mounting over `/n/bps`
 
 ## Updating bpsroot
 
@@ -135,15 +135,15 @@ git9/clone git://github.com/knusbaum/9bps
 cd 9bps
 mkroot
 pkgbuild clone
-bind pkg /n/pkg
-pkg/install clone
+bind bps /n/bps
+bps/install clone
 ## use clone
-pkg/remove clone
+bps/remove clone
 ```
 
 ## TODO
 
-* Make `makedeps` and `dependencies` work. `dependencies` should go into the `.pkg` meta and be picked up by `pkg/install`
+* Make `makedeps` and `dependencies` work. `dependencies` should go into the `.pkg` meta and be picked up by `bps/install`
 * Write `go` style
 * Write more templates to exercise code and find bugs
 

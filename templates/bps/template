@@ -1,0 +1,18 @@
+pkg=bps
+version=9920b97ec0
+rev=1
+style=extract
+wrksrc='bps-9920b97ec0992bb8cc8270031b4a056dbad5dc88'
+maintainer='Kyle Nusbaum <knusbaum@sdf.org>'
+description='package manager for 9bps'
+noarch=true
+
+files='https://git.sr.ht/~kjn/bps/archive/9920b97ec0992bb8cc8270031b4a056dbad5dc88.tar.gz'
+sums='1b8b86a059ea7263c67d7488e13792844f912880'
+
+fn deps {}
+
+fn install {
+	mkdir /rc/bin/bps
+	dircp bps /rc/bin/bps
+}

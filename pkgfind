@@ -13,13 +13,13 @@ fn pkgsplit {
 	sed 's|.*/(.+)-([a-zA-Z0-9]+_[0-9]+).pkg|\1	\2|g'
 }
 
-pkg=`{ls /n/pkg/$objtype | grep $pkgname'-([a-zA-Z0-9.]+)_([0-9]+).pkg'}
+pkg=`{ls /n/bps/$objtype | grep $pkgname'-([a-zA-Z0-9.]+)_([0-9]+).pkg'}
 
 if(~ $pkg '') {
-	pkg=`{ls /n/pkg/noarch | grep $pkgname'-([a-zA-Z0-9.]+)_([0-9]+).pkg'}
+	pkg=`{ls /n/bps/noarch | grep $pkgname'-([a-zA-Z0-9.]+)_([0-9]+).pkg'}
 	if(~ $pkg '') {
 		echo Could not find $pkgname >[1=2]
-		exit no_pkg
+		exit no_bps
 	}
 }
 

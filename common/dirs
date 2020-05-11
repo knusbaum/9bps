@@ -10,7 +10,7 @@ if(~ $9bpsdir '') {
 
 fcache=$9bpsdir/pkgcache
 pkgbuild=$9bpsdir/buildroot/$pkg-$version^_$rev
-packagedir=$9bpsdir/pkg/$targetarch
+packagedir=$9bpsdir/bps/$targetarch
 depdir=$pkgbuild/dependencies
 builddir=$pkgbuild/build
 installdir=$pkgbuild/artifacts/install

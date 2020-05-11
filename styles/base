@@ -99,15 +99,13 @@ fn extract {
 }
 
 fn deps {
-	if(! hget https://raw.githubusercontent.com/knusbaum/pkg/master/install | rc) {
-		echo FAILED TO INSTALL pkg.
-		exit pkg_failed
+	if(! hget https://git.sr.ht/~kjn/bps/blob/master/install | rc) {
+		echo FAILED TO INSTALL bps.
+		exit bps_failed
 	}
-	#chmod +x /bin/pkg/*
-	#du -a /n/pkg
 	for(dep in $hostmakedeps) {
 		echo INSTALLING $dep
-		if(! objtype=$cputype pkg/install $dep) {
+		if(! objtype=$cputype bps/install $dep) {
 			echo FAILED TO INSTALL DEPENDENCY $dep
 			exit dep_failed.
 		}

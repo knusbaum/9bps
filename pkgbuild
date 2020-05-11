@@ -48,14 +48,14 @@ mkdir -p $tardir
 
 rfork ne
 
-## Bind our pkg over /n/pkg for finding deps.
-srv tcp!pkg.9project.net!565 pkg /n/remotepkg
-rm -f /srv/buildpkg
-if(! unionfs -m /n/pkg -s buildpkg -c ./pkg /n/remotepkg) {
+## Bind our bps over /n/bps for finding deps.
+srv tcp!pkg.9project.net!565 bps /n/remotebps
+rm -f /srv/buildbps
+if(! unionfs -m /n/bps -s buildbps -c ./bps /n/remotebps) {
 	echo Failed to unionfs.
 }
 
-if(test -f /n/pkg/$targetarch/$pkg-$version^_$rev.pkg) {
+if(test -f /n/bps/$targetarch/$pkg-$version^_$rev.pkg) {
 	echo $pkg-$version $targetarch already built.
 	exit already_built
 }
@@ -73,9 +73,9 @@ webfs
 @{
 	rfork e
 	checkdeps=$hostmakedeps
-	if(! ~ $pkg pkg) {
-		## All packages except pkg depend on pkg.
-		checkdeps=(pkg $hostmakedeps)
+	if(! ~ $pkg bps) {
+		## All packages except bps depend on bps.
+		checkdeps=(bps $hostmakedeps)
 	}
 	## hostmakedeps need to be for host $cputype
 	objtype=$cputype

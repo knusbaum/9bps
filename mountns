@@ -46,7 +46,7 @@ mount -a /srv/net /net
 mount -bC -c #s/boot /oldroot
 bind -b -c /oldroot/$cur /9bps
 bind -c /oldroot/usr/$user/tmp /tmp
-mount -c -aC #s/buildpkg /n/pkg
+mount -c -aC #s/buildbps /n/bps
 
 bind -c /usr/$user/tmp /tmp
 cd /usr/$user
