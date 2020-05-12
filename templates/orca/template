@@ -1,0 +1,15 @@
+pkg=orca
+version=e47e8d5a5b
+rev=1
+style=mk
+wrksrc='orca-e47e8d5a5b5fa15bb27d063d0132107251a56771'
+maintainer='Kyle Nusbaum <knusbaum@sdf.org>'
+description='quickly create procedural sequencers'
+license=MIT
+
+files='https://git.sr.ht/~ft/orca/archive/e47e8d5a5b5fa15bb27d063d0132107251a56771.tar.gz'
+sums='7408d80e2928cb4c719640ff21b50f42406f9188'
+
+fn post_install {
+	ilicense LICENSE.md
+}

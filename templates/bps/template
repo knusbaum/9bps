@@ -5,6 +5,7 @@ style=extract
 wrksrc='bps-9920b97ec0992bb8cc8270031b4a056dbad5dc88'
 maintainer='Kyle Nusbaum <knusbaum@sdf.org>'
 description='package manager for 9bps'
+license=MIT
 noarch=true
 
 files='https://git.sr.ht/~kjn/bps/archive/9920b97ec0992bb8cc8270031b4a056dbad5dc88.tar.gz'
@@ -15,4 +16,5 @@ fn deps {}
 fn install {
 	mkdir /rc/bin/bps
 	dircp bps /rc/bin/bps
+	ilicense LICENSE
 }

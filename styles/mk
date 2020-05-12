@@ -1,4 +1,4 @@
-whatis build >/dev/null >[2=1]
+rc -c 'whatis build' >/dev/null >[2=1]
 if(! ~ $status '') {
 	fn build {
 		if(! cd $builddir/$wrksrc) {
@@ -11,7 +11,7 @@ if(! ~ $status '') {
 	}
 }
 
-whatis install >/dev/null >[2=1]
+rc -c 'whatis install' >/dev/null >[2=1]
 if(! ~ $status '') {
 	fn install {
 		mk install

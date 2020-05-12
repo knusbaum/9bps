@@ -1,0 +1,27 @@
+#!/bin/rc -e
+
+if(test -d /sys/lib/bps/bps) {
+	echo /sys/lib/bps/bps exists. bps appears to already be installed.
+	exit already_installed
+}
+
+rfork ne
+if(~ `{ls /n/bps} '') {
+	echo no repo at /n/bps. Mounting tcp!9project.net!566. >[1=2]
+	srv tcp!pkg.9project.net!565 bps /n/bps
+}
+
+pkg=`{ls /n/bps/noarch | grep 'bps-([a-zA-Z0-9]+)_([0-9]+).pkg'}
+if(~ $pkg '') {
+	echo Failed to install. Could not find bps in /n/bps/noarch.
+	exit no_bps
+}
+
+mkdir -p /sys/lib/bps/bps
+@{ cd /sys/lib/bps/bps && tar -xzf $pkg }
+
+. /sys/lib/bps/bps/meta
+
+echo Unpacking bps-$version into /
+cd /
+tar -xf /sys/lib/bps/bps/root.tar

@@ -1,11 +1,11 @@
 pkg=go
-version=1.13.10
-#version=1.14.2
+version=1.14.2
 rev=1
 style=mk
-wrksrc='go-go1.13.10'
+wrksrc='go-go'^$version
 maintainer='Kyle Nusbaum <knusbaum@sdf.org>'
 description='the Go programming language'
+license=Custom
 
 ## Unfortunately, the way I'm building go currently is to
 ## use a go bootstrap tarball that was cross compiled on 
@@ -27,13 +27,13 @@ if not {
 	hostmakedeps=(go)
 }
 
-files='https://github.com/golang/go/archive/go1.13.10.tar.gz'
-sums='5c3ddb360c50fb79c16edb673c6a7670808af251'
+files='https://github.com/golang/go/archive/go'^$version^'.tar.gz'
+sums='6204af606e5308ab03e386fb86e1bdea6a6f11bc'
 arches=(386 amd64 arm)
 
 fn build {
 	echo BUILDING GO
-	cd $wrksrc/src
+	cd src
 	GOOS=plan9 GOARCH=$objtype GOROOT_FINAL=/sys/lib/go GOROOT_BOOTSTRAP=/sys/lib/go ./make.rc
 }
 
@@ -55,4 +55,5 @@ fn install {
 
 	## Copy the go binaries into the correct bin directory.
 	cp /sys/lib/go/bin/* /$objtype/bin/
+	ilicense $builddir/$wrksrc/LICENSE
 }

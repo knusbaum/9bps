@@ -114,12 +114,12 @@ fn deps {
 }
 
 fn patch {
-	lc
-	pwd
-	for(patch in `{ls $patchdir}) {
-		if(! ape/patch -p 0 -u -i $patch) {
-			echo Patch $patch failed to apply.
-			exit patch_failed
+	if(test -d $patchdir) {
+		for(patch in `{ls $patchdir}) {
+			if(! ape/patch -p 0 -u -i $patch) {
+				echo Patch $patch failed to apply.
+				exit patch_failed
+			}
 		}
 	}
 	status=''
@@ -146,6 +146,7 @@ fn package {
 	echo 'arch='$targetarch >>meta
 	echo 'maintainer='''$maintainer'''' >>meta
 	echo 'description='''$description'''' >>meta
+	echo 'license='''$license'''' >>meta
 	tar -czf $packagedir/$pkg-$version^_$rev.pkg *
 }
 
@@ -166,4 +167,13 @@ fn trystage {
 	try $1
 	try post_$1
 	status=''
+}
+
+fn debugrc {
+	prompt='(DEBUG) '^$prompt rc
+}
+
+## install license
+fn ilicense {
+	cp $1 $tardir/
 }

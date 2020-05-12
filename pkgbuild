@@ -1,7 +1,5 @@
 #!/bin/rc
 
-
-
 pname=$1
 if(~ $1 '') {
 	echo 'Usage: pkgbuild [package name]'
@@ -21,11 +19,17 @@ hostmakedeps=()
 makedeps=()
 deps=()
 wrksrc=()
+license=()
 style=mk
 
 . $stylesdir/base
 try . $template
 . $stylesdir/$style
+
+if(~ $license '') {
+	echo Must define a license in template $template
+	exit no_license
+}
 
 if(~ $wrksrc '') {
 	wrksrc=$pkg-$version
@@ -107,7 +111,31 @@ if(! ~ $status '') {
 }
 
 trystage fetch
-trystage extract
+
+$9bpsdir/common/run9bpsns $depdir /n/other/usr/$user/bpsroot '
+	9bpsdir=/9bps
+	. /9bps/common/dirs
+
+	webfs
+	trystage deps
+'
+if(! ~ $status '') {
+	echo Dependency failed.
+	exit deps_failed
+}
+
+$9bpsdir/common/run9bpsns $depdir /n/other/usr/$user/bpsroot '
+	9bpsdir=/9bps
+	. /9bps/common/dirs
+
+	webfs
+	cd $builddir
+	trystage extract
+'
+if(! ~ $status '') {
+	echo Extract failed.
+	exit extract_failed
+}
 
 $9bpsdir/common/run9bpsns $depdir /n/other/usr/$user/bpsroot '
 	9bpsdir=/9bps
@@ -123,18 +151,6 @@ $9bpsdir/common/run9bpsns $depdir /n/other/usr/$user/bpsroot '
 if(! ~ $status '') {
 	echo Patch failed.
 	exit patch_failed
-}
-
-$9bpsdir/common/run9bpsns $depdir /n/other/usr/$user/bpsroot '
-	9bpsdir=/9bps
-	. /9bps/common/dirs
-
-	webfs
-	trystage deps
-'
-if(! ~ $status '') {
-	echo Dependency failed.
-	exit deps_failed
 }
 
 echo STARTING BUILD

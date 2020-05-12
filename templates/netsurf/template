@@ -1,0 +1,24 @@
+pkg=netsurf
+version=c19713aeb9
+rev=1
+style=mk
+wrksrc='nsport-c19713aeb9103899c3c6ee755a61d985eb2b4310'
+hostmakedeps=(git9)
+maintainer='Kyle Nusbaum <knusbaum@sdf.org>'
+description='port of the Netsurf Browser'
+license='GPL-2.0,MIT'
+
+files='https://github.com/netsurf-plan9/nsport/archive/c19713aeb9103899c3c6ee755a61d985eb2b4310.tar.gz'
+sums='72c86f45b6d24d7a5b99d3ed2b6a083b0685206c'
+
+fn post_patch {
+	cd $builddir/$wrksrc
+	./fetch clone http
+	status=''
+}
+
+fn pre_install {
+	cd netsurf
+	mkdir /$objtype/bin
+	ilicense COPYING
+}

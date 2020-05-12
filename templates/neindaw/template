@@ -1,0 +1,15 @@
+pkg=neindaw
+version=cb02cb542f
+rev=1
+style=mk
+wrksrc='neindaw-cb02cb542f17f9a9fa1c408a32358d0f47f9bd1d'
+maintainer='Kyle Nusbaum <knusbaum@sdf.org>'
+description='some kind of DAW for 9front?'
+license=MIT
+
+files='https://git.sr.ht/~ft/neindaw/archive/cb02cb542f17f9a9fa1c408a32358d0f47f9bd1d.tar.gz'
+sums='dbcf4013007d2434c504e29d6e8ae0f0f46ac27e'
+
+fn post_install {
+	ilicense LICENSE
+}

@@ -1,2 +1,2 @@
 ## Out of the box, 386 amd64 arm arm64 mips seem to work.
-allarch=($cputype 386)
+allarch=($cputype 386 arm arm64 mips)

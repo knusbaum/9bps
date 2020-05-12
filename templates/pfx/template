@@ -1,17 +1,17 @@
 pkg=pfx
-version=92d3d9d1a4
+version=0caade8a5f
 rev=1
-style=fetch
+style=extract
+wrksrc='bin.rc-0caade8a5f4d1d80802fc47b1777336af7aee37e'
 maintainer='Kyle Nusbaum <knusbaum@sdf.org>'
 description='fast parallel file copy'
+license=MIT
 noarch=true
-
-files='http://code.a-b.xyz/bin.rc/plain/bin/pfx?id=92d3d9d1a431f20df9ce8d3d42ac7fb428281a01'
-sums='02d891b3840757f2c89a0c9afa4e8a0dc7312a08'
+files='http://code.a-b.xyz/bin.rc/snapshot/bin.rc-0caade8a5f4d1d80802fc47b1777336af7aee37e.tar.gz'
+sums='023e40e1ab4edf60ff2a013dd135148ac4507899'
 
 
 fn install {
-	#hget 'http://code.a-b.xyz/bin.rc/plain/bin/pfx?id=92d3d9d1a431f20df9ce8d3d42ac7fb428281a01' >/rc/bin/pfx
-	name=`{basename $files}
-	cp $fcache/$name /rc/bin/pfx
+	cp bin/pfx /rc/bin/pfx
+	ilicense LICENSE
 }
